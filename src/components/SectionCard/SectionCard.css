@@ -1,0 +1,121 @@
+.section-card {
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  overflow: hidden;
+  animation: slideInUp 0.4s ease-out;
+}
+
+.section-card--neutral {
+  border: 1.5px solid var(--color-border);
+}
+.section-card--neutral .section-card__header {
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-white) 100%);
+}
+
+/* 1. Blue */
+.section-card--blue { border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,0.1); }
+.section-card--blue .section-card__header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border-bottom: none; }
+
+/* 2. Indigo */
+.section-card--indigo { border-color: #6366f1; box-shadow: 0 0 0 1px rgba(99,102,241,0.1); }
+.section-card--indigo .section-card__header { background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border-bottom: none; }
+
+/* 3. Purple */
+.section-card--purple { border-color: #a855f7; box-shadow: 0 0 0 1px rgba(168,85,247,0.1); }
+.section-card--purple .section-card__header { background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); border-bottom: none; }
+
+/* 4. Pink */
+.section-card--pink { border-color: #ec4899; box-shadow: 0 0 0 1px rgba(236,72,153,0.1); }
+.section-card--pink .section-card__header { background: linear-gradient(135deg, #db2777 0%, #be185d 100%); border-bottom: none; }
+
+/* 5. Rose */
+.section-card--rose { border-color: #f43f5e; box-shadow: 0 0 0 1px rgba(244,63,94,0.1); }
+.section-card--rose .section-card__header { background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border-bottom: none; }
+
+/* 6. Red */
+.section-card--red { border-color: #ef4444; box-shadow: 0 0 0 1px rgba(239,68,68,0.1); }
+.section-card--red .section-card__header { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-bottom: none; }
+
+/* 7. Orange */
+.section-card--orange { border-color: #f97316; box-shadow: 0 0 0 1px rgba(249,115,22,0.1); }
+.section-card--orange .section-card__header { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); border-bottom: none; }
+
+/* 8. Yellow */
+.section-card--yellow { border-color: #eab308; box-shadow: 0 0 0 1px rgba(234,179,8,0.1); }
+.section-card--yellow .section-card__header { background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%); border-bottom: none; }
+
+/* 9. Green */
+.section-card--green { border-color: #22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,0.1); }
+.section-card--green .section-card__header { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); border-bottom: none; }
+
+/* 10. Emerald */
+.section-card--emerald { border-color: #10b981; box-shadow: 0 0 0 1px rgba(16,185,129,0.1); }
+.section-card--emerald .section-card__header { background: linear-gradient(135deg, #059669 0%, #047857 100%); border-bottom: none; }
+
+/* 11. Teal */
+.section-card--teal { border-color: #14b8a6; box-shadow: 0 0 0 1px rgba(20,184,166,0.1); }
+.section-card--teal .section-card__header { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); border-bottom: none; }
+
+/* 12. Cyan */
+.section-card--cyan { border-color: #06b6d4; box-shadow: 0 0 0 1px rgba(6,182,212,0.1); }
+.section-card--cyan .section-card__header { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); border-bottom: none; }
+
+/* Base styles for all cards */
+.section-card {
+  border: 1.5px solid transparent; /* default if no variant */
+}
+
+/* Ensure colored headers have white text */
+.section-card:not(.section-card--neutral) .section-card__title {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.section-card__header {
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.section-card__title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.section-card__body {
+  padding: var(--space-xl);
+}
+
+.section-card__header--collapsible {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.2s ease;
+  user-select: none;
+}
+
+.section-card__header--collapsible:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.section-card__collapse-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.section-card__collapse-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.section-card--neutral .section-card__collapse-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}

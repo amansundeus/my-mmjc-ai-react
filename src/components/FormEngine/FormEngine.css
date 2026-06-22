@@ -1,0 +1,244 @@
+/* ===== Dynamic Form Engine Styles ===== */
+
+/* Section Spacing */
+.dynamic-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.dynamic-section__additional-fields {
+  margin-top: var(--space-xl);
+}
+
+/* Subsection */
+.dynamic-subsection {
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-xl);
+  border-top: 1px dashed var(--color-border);
+}
+
+.dynamic-subsection:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.dynamic-subsection__header {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.dynamic-subsection__additional-fields {
+  margin-top: var(--space-xl);
+}
+
+/* Field Grid */
+.dynamic-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-xl) var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+@media (min-width: 1024px) {
+  .dynamic-field-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 768px) {
+  .dynamic-field-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) and (min-width: 480px) {
+  .dynamic-field-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 479px) {
+  .dynamic-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tables */
+.dynamic-table-container {
+  margin: var(--space-2xl) 0;
+}
+
+.dynamic-table__title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.dynamic-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.dynamic-table-engine {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-sm);
+}
+
+.dynamic-table-engine thead {
+  background: var(--color-bg-secondary);
+}
+
+.dynamic-table-engine th {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border-light);
+  white-space: nowrap;
+}
+
+.dynamic-table-engine th:last-child {
+  border-right: none;
+}
+
+.dynamic-table__th-group {
+  text-align: center !important;
+  background: var(--color-border-light);
+}
+
+.dynamic-table__th-sub {
+  font-size: var(--font-xs);
+  color: var(--color-text-secondary);
+}
+
+.dynamic-table-engine td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border-light);
+  vertical-align: middle;
+}
+
+.dynamic-table-engine td:last-child {
+  border-right: none;
+}
+
+.dynamic-table-engine tbody tr:hover {
+  background: rgba(248, 250, 252, 0.5);
+}
+
+.dynamic-table__cell-label {
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: normal;
+  min-width: 200px;
+}
+
+/* Compact inputs in table */
+.dynamic-table__input {
+  margin: 0 !important;
+}
+
+.dynamic-table__input .form-field__input {
+  height: 32px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-sm);
+}
+
+.dynamic-table__input .form-field__control {
+  min-width: 120px;
+}
+
+/* Two-column layout overrides */
+.dynamic-table-engine--two_column_table th:first-child,
+.dynamic-table-engine--two_column_table td:first-child {
+  width: 60%;
+}
+
+/* Dynamic Group Styles */
+.dynamic-group {
+  margin-bottom: 24px;
+}
+
+.dynamic-group__header {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-color, #1f2937);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dynamic-group__entities {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.dynamic-group__entity-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafafa;
+  position: relative;
+}
+
+.dynamic-group__entity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dynamic-group__entity-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.dynamic-group__remove-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.dynamic-group__remove-btn:hover {
+  background-color: #fee2e2;
+}
+
+.dynamic-group__actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.dynamic-group__add-btn {
+  background: none;
+  border: 1px dashed #cbd5e1;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dynamic-group__add-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}

@@ -1,0 +1,119 @@
+.data-table-wrapper {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.data-table-scroll {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-base);
+}
+
+.data-table thead {
+  background: var(--color-bg-secondary);
+}
+
+.data-table th {
+  padding: var(--space-md) var(--space-lg);
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
+  text-transform: capitalize;
+}
+
+.data-table td {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text);
+  font-size: var(--font-base);
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-primary-bg);
+}
+
+.data-table__row--selected {
+  background: var(--color-primary-bg) !important;
+}
+
+.data-table__checkbox-col {
+  width: 40px;
+  text-align: center !important;
+}
+
+.data-table__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.data-table__empty {
+  text-align: center !important;
+  padding: var(--space-4xl) !important;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Pagination */
+.data-table__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+.data-table__page-btn {
+  min-width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  padding: 0 var(--space-sm);
+}
+
+.data-table__page-btn:hover:not(:disabled) {
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.data-table__page-btn--active {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
+}
+
+.data-table__page-btn--nav {
+  font-size: var(--font-lg);
+}
+
+.data-table__page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.data-table__page-ellipsis {
+  color: var(--color-text-muted);
+  padding: 0 var(--space-xs);
+}

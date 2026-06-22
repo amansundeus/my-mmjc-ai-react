@@ -1,0 +1,207 @@
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: relative;
+}
+
+.form-field__label {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.form-field__required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+
+.form-field__control {
+  position: relative;
+}
+
+.form-field__input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  color: var(--color-text);
+  background: var(--color-white);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  height: 40px;
+}
+
+.form-field__input:focus {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-field__input:disabled {
+  background: var(--color-bg-secondary);
+  cursor: not-allowed;
+}
+
+.form-field__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Select */
+.form-field__select-wrapper {
+  position: relative;
+}
+
+.form-field__select {
+  appearance: none;
+  padding-right: var(--space-3xl) !important;
+  cursor: pointer;
+}
+
+.form-field__select-arrow {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+/* File */
+.form-field__file-wrapper {
+  width: 100%;
+}
+
+.form-field__file-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  height: 40px;
+}
+
+.form-field__file-icon {
+  font-size: var(--font-base);
+  flex-shrink: 0;
+}
+
+.form-field__file-name {
+  flex: 1;
+  font-size: var(--font-base);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-field__file-upload-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.form-field__file-upload-btn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-primary);
+}
+
+/* Radio Group */
+.form-field__radio-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  height: 40px;
+}
+
+.form-field__radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+}
+
+.form-field__radio-input {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.form-field__radio-text {
+  font-size: var(--font-base);
+  color: var(--color-text);
+}
+
+/* Currency */
+.form-field__currency-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-field__currency-prefix {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-md);
+  background: var(--color-bg-secondary);
+  border: 1.5px solid var(--color-border);
+  border-right: none;
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.form-field__input--with-prefix {
+  padding-left: 48px;
+}
+
+/* AI Filled State */
+.form-field--ai-filled .form-field__input {
+  border-color: #d8b4fe; /* Purple */
+  background: #faf5ff;
+}
+
+.form-field__ai-indicator {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  background: #f3e8ff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: pulse 2s infinite;
+}
+
+/* Hide arrow for number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

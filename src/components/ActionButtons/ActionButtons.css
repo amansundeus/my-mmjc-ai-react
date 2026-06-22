@@ -1,0 +1,32 @@
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--action-color, var(--color-text-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: scale(1.1);
+}
+
+.action-btn.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.action-btn.disabled:hover {
+  background: transparent;
+  transform: none;
+}
