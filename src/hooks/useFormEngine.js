@@ -423,8 +423,12 @@ export function useFormEngine(formId, formTypeId = 2) {
                addressMappings.forEach(mapping => {
                    if (mapping.value !== undefined && mapping.value !== null) {
                        const field = allFields.find(f => f.label && f.label.toLowerCase() === mapping.labelTerm);
-                       // Fallback to includes if exact match not found
-                       const fieldIncludes = allFields.find(f => f.label && f.label.toLowerCase().includes(mapping.labelTerm));
+                       // Fallback to word boundary match if exact match not found
+                       const fieldIncludes = allFields.find(f => {
+                           if (!f.label) return false;
+                           const regex = new RegExp(`\\b${mapping.labelTerm}\\b`, 'i');
+                           return regex.test(f.label);
+                       });
                        const targetField = field || fieldIncludes;
                        
                        if (targetField) {

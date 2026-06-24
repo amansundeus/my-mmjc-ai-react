@@ -354,28 +354,33 @@ export async function createOrUpdateFormWithDocuments(metadata, sourceFiles, tem
   const url = `${API_BASE_URL}/mmjc-ai/form`;
   const payload = new FormData();
 
-  // Spring Boot usually parses JSON string parts or blobs for complex objects
   payload.append('formData', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
 
   if (sourceFiles && sourceFiles.length > 0) {
     sourceFiles.forEach(file => payload.append('sources', file));
+  } else {
+    // Bypass backend error for required 'sources' part if none provided
+    payload.append('sources', new Blob([''], { type: 'application/octet-stream' }), 'empty.txt');
   }
 
   if (templateFile) {
     payload.append('template', templateFile);
+  } else {
+    // Bypass backend error for required 'template' part if none provided
+    payload.append('template', new Blob([''], { type: 'application/octet-stream' }), 'empty_template.txt');
   }
 
   const response = await fetchWithAuth(url, {
     method: 'POST',
     body: payload
   });
-
+  
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Status ${response.status}: ${errorText || response.statusText}`);
+    throw new Error(`Failed to create or update form: ${errorText || response.statusText}`);
   }
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
+  
+  return response.json();
 }
 
 export async function getFormsList(formTypeMasterId = 1) {

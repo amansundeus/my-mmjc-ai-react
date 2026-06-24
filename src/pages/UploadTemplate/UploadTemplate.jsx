@@ -101,14 +101,28 @@ function UploadTemplate() {
             
             const docs = body.documents || body.irlDocuments || (Array.isArray(body) ? body : []);
             if (docs && Array.isArray(docs)) {
-              const preUploaded = docs.map((doc, idx) => ({
-                id: doc.id || doc.documentId || `prev-${idx}`,
-                name: doc.documentName || doc.fileName || doc.file_name || 'Uploaded Document',
-                type: (doc.documentName || '').endsWith('.xlsx') ? 'excel' : 'pdf',
-                url: doc.documentUrl || doc.fileUrl || doc.file_url,
-                isPreUploaded: true
-              }));
-              setSourceFiles(preUploaded);
+              const fetchedSources = [];
+              const fetchedTemplates = [];
+
+              docs.forEach((doc, idx) => {
+                const fileObj = {
+                  id: doc.id || doc.documentId || `prev-${idx}`,
+                  name: doc.documentName || doc.fileName || doc.file_name || 'Uploaded Document',
+                  type: (doc.documentName || '').endsWith('.xlsx') ? 'excel' : 'pdf',
+                  url: doc.documentUrl || doc.fileUrl || doc.file_url,
+                  isPreUploaded: true,
+                  docType: doc.docType || 'Source'
+                };
+
+                if (fileObj.docType.toLowerCase() === 'template') {
+                  fetchedTemplates.push(fileObj);
+                } else {
+                  fetchedSources.push(fileObj);
+                }
+              });
+
+              setSourceFiles(fetchedSources);
+              setTemplateFiles(fetchedTemplates);
             }
           }
         })
@@ -249,21 +263,40 @@ function UploadTemplate() {
 
   const handleSubmitAdd = async () => {
     try {
+      const targetFormId = selectedIrl?.irlId || selectedIrl?.formId || selectedIrl?.id || formData.formId;
+
       const metadata = {
         companyName: formData.companyName || fullIrlDetails?.companyName,
         cin: formData.cin || fullIrlDetails?.cin,
         financialYear: formData.financialYear || fullIrlDetails?.financialYear,
         teamName: formData.teamName || fullIrlDetails?.teamName,
         formTypeMasterId: formData.formTypeMasterId || fullIrlDetails?.formTypeMasterId || "1",
-        templateMasterId: formData.templateMasterId || fullIrlDetails?.templateMasterId || "1"
+        templateMasterId: formData.templateMasterId || fullIrlDetails?.templateMasterId || "1",
+        irlFormId: targetFormId || null,
+        formId: targetFormId || null
       };
       
       const sourcesToUpload = sourceFiles.filter(f => f.rawFile).map(f => f.rawFile);
       const templatesToUpload = templateFiles.filter(f => f.rawFile).map(f => f.rawFile);
       const templateToUpload = templatesToUpload.length > 0 ? templatesToUpload[0] : null;
 
+      // Ensure any newly selected documents are uploaded to the IRL form first
+      if (targetFormId) {
+        for (const f of sourcesToUpload) {
+          await uploadIrlDocument(targetFormId, f, 'Source');
+        }
+        for (const f of templatesToUpload) {
+          await uploadIrlDocument(targetFormId, f, 'Template');
+        }
+      }
+
+      // Then call POST /mmjc-ai/form to create the legacy form entry
       await createOrUpdateFormWithDocuments(metadata, sourcesToUpload, templateToUpload);
-      alert("Form and documents uploaded successfully!");
+      alert("Form added successfully!");
+      
+      // Force trigger refetch of forms list
+      setFormData(prev => ({ ...prev }));
+
       // Force trigger refetch of forms list
       setFormData(prev => ({ ...prev }));
     } catch (err) {

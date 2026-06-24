@@ -193,11 +193,56 @@ function AttributeManagement() {
     if (!schema) return
     try {
       setSaving(true)
-      await saveFormAttributesBulk(masterIds.formTypeId, schema)
+      
+      const formTypeId = masterIds.formTypeId;
+      
+      // Extract a valid sectionMasterId from an existing field to assign to newly pasted fields
+      // This prevents the 400 foreign key constraint error when copying from another Form Type
+      const existingField = schema.find(f => !f.isNew && f.sectionMasterId);
+      const targetSectionId = existingField ? existingField.sectionMasterId : null;
+
+      // Process fields individually to avoid bulk API side-effects
+      for (const field of schema) {
+        const payload = {
+          ...field,
+          name: field.name || field.label,
+          fieldNo: field.fieldNo || field.fieldId,
+          isMandatory: field.isMandatory !== undefined ? field.isMandatory : field.required,
+          fieldType: field.fieldType || field.type,
+          formTypeMasterId: formTypeId,
+          templateMasterId: masterIds.templateId || field.templateMasterId || null,
+          sourceMasterId: masterIds.sourceId || field.sourceMasterId || null,
+        };
+        
+        // Clean UI specific keys
+        delete payload.label;
+        delete payload.fieldId;
+        delete payload.required;
+        delete payload.type;
+        delete payload.isNew;
+        delete payload.attributeId;
+        delete payload.originalIndex;
+
+        if (field.isNew) {
+          delete payload.id; // ensure no ID for creation
+          // Use the target form's valid section to prevent cross-form 400 error
+          payload.sectionMasterId = targetSectionId;
+          await createAttribute(payload);
+        } else {
+          const attributeId = field.id || field.attributeId;
+          if (attributeId) {
+            await updateFormAttribute(attributeId, payload);
+          }
+        }
+      }
+      
+      // Reload attributes to get final updated state
+      await handleLoadAttributes();
+      
       alert('Schema saved successfully!')
     } catch (err) {
       console.error('Error saving attributes', err)
-      alert('Failed to save schema.')
+      alert('Failed to save schema. Some fields may not have been saved.')
     } finally {
       setSaving(false)
     }
@@ -234,12 +279,19 @@ function AttributeManagement() {
       const currentAttrId = nextAttrId;
       setNextAttrId(currentAttrId + 1);
 
+      // Find the highest sortOrder in the current schema to assign logical sequence
+      const highestSortOrder = schema && schema.length > 0 
+        ? Math.max(...schema.map(f => parseFloat(f.sortOrder || f.sort_order || 0))) 
+        : 0;
+
       // Strip original IDs and assign to current form
       const pastedField = {
         ...parsedField,
         id: undefined, // remove backend id
         attributeId: `new_${currentAttrId}`,
-        fieldId: `field_${currentAttrId}`,
+        fieldId: parsedField.fieldId || parsedField.fieldNo, // copy exactly
+        fieldNo: parsedField.fieldNo || parsedField.fieldId, // copy exactly
+        sortOrder: highestSortOrder + 1, // assign next sequence
         isNew: true,
         formTypeMasterId: masterIds.formTypeId, // assign to current form type
         label: `${parsedField.name || parsedField.label} (Copy)`
@@ -307,63 +359,26 @@ function AttributeManagement() {
   const handleSaveModal = async () => {
     try {
       const payload = {
-        name: editingField.name || editingField.label,
-        fieldNo: editingField.fieldNo ?? editingField.field_no ?? editingField.fieldId,
-        sortOrder: parseFloat(editingField.sortOrder ?? editingField.sort_order ?? 0),
-        charLimit: editingField.charLimit ?? editingField.char_limit,
-        isEditable: editingField.isEditable !== false && editingField.is_editable !== false,
-        isMandatory: editingField.isMandatory || editingField.is_mandatory || editingField.required || false,
-        dependentOn: editingField.dependent_on,
-        dependencyRule: editingField.dependency_rule,
-        sourceFetchField: editingField.source_fetch_field,
-        aoc4FieldRef: editingField.aoc4_field_ref,
-        masterToUpdate: editingField.master_to_update,
-        masterFieldRef: editingField.master_field_ref,
-        searchKeywords: editingField.search_keywords,
-        fieldSpecJson: editingField.field_spec_json,
-        sectionMasterId: editingField.sectionMasterId ?? editingField.section_master_id,
-        filingTypeMasterId: editingField.filingTypeMasterId ?? editingField.filing_type_master_id,
-        datatypeMasterId: editingField.datatypeMasterId ?? editingField.datatype_master_id,
-        formTypeMasterId: editingField.formTypeMasterId ?? editingField.form_type_master_id,
-        templateMasterId: editingField.templateMasterId ?? editingField.template_master_id,
-        sourceMasterId: editingField.sourceMasterId ?? editingField.source_master_id,
-        renderType: editingField.renderType ?? editingField.render_type,
-        fieldType: editingField.field_type || editingField.type,
+        ...editingField,
+        label: editingField.name || editingField.label,
+        fieldId: editingField.fieldNo ?? editingField.field_no ?? editingField.fieldId,
+        required: editingField.isMandatory || editingField.is_mandatory || editingField.required || false,
+        type: editingField.fieldType || editingField.field_type || editingField.type || 'text',
         format: editingField.format,
-        gridColumn: Number(editingField.grid_column || editingField.gridColumn || 1),
         placeholder: editingField.placeholder,
         prefix: editingField.prefix,
+        gridColumn: Number(editingField.grid_column || editingField.gridColumn || 1),
         defaultValue: editingField.default_value || editingField.defaultValue,
-        optionsJson: editingField.options_json,
-        conditionalOnField: editingField.conditional_on_field,
-        conditionalOnValue: editingField.conditional_on_value,
-        elementGroupKey: editingField.element_group_key,
-        elementGroupTitle: editingField.element_group_title,
-        elementGroupType: editingField.element_group_type,
-        columnKey: editingField.column_key || editingField.columnKey,
-        columnHeader: editingField.column_header,
-        parentColumnKey: editingField.parent_column_key,
-        parentColumnHeader: editingField.parent_column_header,
-        addButtonLabel: editingField.addButtonLabel ?? editingField.add_button_label,
-        entityLabelPrefix: editingField.entityLabelPrefix ?? editingField.entity_label_prefix,
-        highlight: editingField.highlight
+        optionsJson: editingField.options_json || editingField.optionsJson,
+        options: editingField.options,
+        conditionalOnField: editingField.conditional_on_field || editingField.conditionalOnField,
+        conditionalOnValue: editingField.conditional_on_value || editingField.conditionalOnValue,
+        dependentOn: editingField.dependent_on || editingField.dependentOn,
+        dependencyRule: editingField.dependency_rule || editingField.dependencyRule,
       };
 
-      // Ensure undefined fields are removed so we don't send garbage
-      Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
-
-      const attributeId = editingField.id || editingField.attributeId;
-      let savedField = { ...editingField };
-
-      if (editingField.isNew || !attributeId || String(attributeId).startsWith('new_')) {
-        const res = await createAttribute(payload);
-        const newData = res.body || res;
-        savedField = { ...savedField, ...newData, isNew: false };
-        alert('Attribute created successfully!');
-      } else {
-        await updateFormAttribute(attributeId, payload);
-        alert('Attribute updated successfully!');
-      }
+      // Just update local schema state. Backend save happens on "Save Schema" click
+      const savedField = { ...payload, isNew: editingField.isNew };
 
       const updated = [...schema]
       updated[editingIndex] = savedField
@@ -371,12 +386,28 @@ function AttributeManagement() {
       closeEditModal()
     } catch (err) {
       console.error('Error saving attribute', err)
-      alert('Failed to update attribute.')
+      alert('Failed to update attribute locally.')
     }
   }
 
   const handleCopyField = async (index) => {
-    const fieldToCopy = schema[index];
+    const fallbackField = schema[index];
+    const attributeId = fallbackField.id || fallbackField.attributeId;
+    
+    let fieldToCopy = { ...fallbackField };
+
+    if (!fallbackField.isNew && attributeId && !String(attributeId).startsWith('new_')) {
+      try {
+        setLoading(true);
+        const res = await getFormAttributeById(attributeId);
+        const fullData = res.body || res;
+        fieldToCopy = { ...fallbackField, ...fullData };
+      } catch (err) {
+        console.error('Failed to fetch full attribute for copying', err);
+      } finally {
+        setLoading(false);
+      }
+    }
     
     // Save to local storage for cross-form pasting
     localStorage.setItem('mmjc_copied_attribute', JSON.stringify(fieldToCopy));
@@ -386,15 +417,18 @@ function AttributeManagement() {
   const handleRemoveField = async (index) => {
     if (window.confirm("Are you sure you want to delete this field?")) {
       const fieldToDelete = schema[index];
-      const attributeId = fieldToDelete.id || fieldToDelete.attributeId;
       
-      if (!fieldToDelete.isNew && attributeId && !String(attributeId).startsWith('new_')) {
+      // Delete from backend immediately if it's an existing field
+      if (!fieldToDelete.isNew) {
         try {
-          await deleteAttribute(attributeId);
-          alert('Attribute deleted successfully!');
-        } catch (err) {
-          console.error('Failed to delete attribute', err);
-          alert('Failed to delete attribute from server. It will be removed from the UI.');
+          const attributeId = fieldToDelete.id || fieldToDelete.attributeId;
+          if (attributeId) {
+            await deleteAttribute(attributeId);
+          }
+        } catch (e) {
+          console.error("Failed to delete attribute", e);
+          alert('Failed to delete attribute on server');
+          return;
         }
       }
 

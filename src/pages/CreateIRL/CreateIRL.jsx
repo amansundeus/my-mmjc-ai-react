@@ -30,7 +30,8 @@ function CreateIRL() {
     templateName: '',
     templateMasterId: '',
     standaloneFinancial: 'Balance sheet',
-    uploadDocument: 'Balance sheet',
+    sourceFiles: [],
+    templateFiles: [],
   })
 
   const [irlList, setIrlList] = useState([])
@@ -130,11 +131,17 @@ function CreateIRL() {
     }
   }
 
-  const handleFileUpload = (e) => {
+  const handleSourceUpload = (e) => {
     const files = Array.from(e.target.files || [])
     if (files.length > 0) {
-      const fileNames = files.map(f => f.name).join(', ')
-      setFormData(prev => ({ ...prev, uploadDocument: fileNames, documentFiles: files }))
+      setFormData(prev => ({ ...prev, sourceFiles: files }))
+    }
+  }
+
+  const handleTemplateUpload = (e) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length > 0) {
+      setFormData(prev => ({ ...prev, templateFiles: files }))
     }
   }
 
@@ -165,13 +172,7 @@ function CreateIRL() {
       formTypeMasterName: formData.selectForm || 'AOC 4',
       templateMasterId: formData.templateMasterId ? parseInt(formData.templateMasterId, 10) : 1,
       templateName: formData.templateName || 'Balance sheet',
-      documents: formData.documentFiles?.length > 0 
-        ? formData.documentFiles.map(f => ({
-            documentName: f.name,
-            documentUrl: null,
-            docType: null
-          }))
-        : [],
+      documents: [],
       formStatus: 'PENDING',
       percentComplete: 0,
       uploadStatus: null
@@ -189,12 +190,23 @@ function CreateIRL() {
       }
       
       const targetFormId = savedForm?.formId || savedForm?.id;
-      if (targetFormId && formData.documentFiles?.length > 0) {
-        for (const file of formData.documentFiles) {
-          try {
-            await uploadIrlDocument(targetFormId, file, 'GENERAL');
-          } catch (uploadErr) {
-            console.error(`Failed to upload file ${file.name}`, uploadErr);
+      if (targetFormId) {
+        if (formData.sourceFiles?.length > 0) {
+          for (const file of formData.sourceFiles) {
+            try {
+              await uploadIrlDocument(targetFormId, file, 'SOURCE');
+            } catch (uploadErr) {
+              console.error(`Failed to upload source file ${file.name}`, uploadErr);
+            }
+          }
+        }
+        if (formData.templateFiles?.length > 0) {
+          for (const file of formData.templateFiles) {
+            try {
+              await uploadIrlDocument(targetFormId, file, 'TEMPLATE');
+            } catch (uploadErr) {
+              console.error(`Failed to upload template file ${file.name}`, uploadErr);
+            }
           }
         }
       }
@@ -362,31 +374,58 @@ function CreateIRL() {
                 />
 
               </div>
-              <div className="create-irl__upload-section">
-                <div className="create-irl__upload-row">
-                  <FormField
-                    label="Upload document"
-                    type="file"
-                    multiple={true}
-                    value={formData.documentFiles?.length ? `${formData.documentFiles.length} file(s) selected` : ''}
-                    onChange={handleFileUpload}
-                    id="upload-document"
-                  />
-                </div>
-                
-                {formData.documentFiles && formData.documentFiles.length > 0 && (
-                  <div className="create-irl__uploaded-files">
-                    <h4 className="create-irl__uploaded-title">Uploaded Files:</h4>
-                    <ul className="create-irl__file-list">
-                      {formData.documentFiles.map((f, i) => (
-                        <li key={i} className="create-irl__file-item">
-                          <span className="create-irl__file-icon">📄</span>
-                          {f.name}
-                        </li>
-                      ))}
-                    </ul>
+              <div className="create-irl__upload-section" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                <div className="create-irl__upload-column" style={{ flex: 1 }}>
+                  <div className="create-irl__upload-row">
+                    <FormField
+                      label="Upload Source Document"
+                      type="file"
+                      multiple={true}
+                      value={formData.sourceFiles?.length ? `${formData.sourceFiles.length} file(s) selected` : ''}
+                      onChange={handleSourceUpload}
+                      id="upload-source"
+                    />
                   </div>
-                )}
+                  {formData.sourceFiles && formData.sourceFiles.length > 0 && (
+                    <div className="create-irl__uploaded-files" style={{ marginTop: '1rem' }}>
+                      <h4 className="create-irl__uploaded-title" style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Source Files:</h4>
+                      <ul className="create-irl__file-list" style={{ listStyle: 'none', padding: 0, marginTop: '8px' }}>
+                        {formData.sourceFiles.map((f, i) => (
+                          <li key={i} className="create-irl__file-item" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                            <span className="create-irl__file-icon">📄</span>
+                            {f.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                <div className="create-irl__upload-column" style={{ flex: 1 }}>
+                  <div className="create-irl__upload-row">
+                    <FormField
+                      label="Upload Template"
+                      type="file"
+                      multiple={true}
+                      value={formData.templateFiles?.length ? `${formData.templateFiles.length} file(s) selected` : ''}
+                      onChange={handleTemplateUpload}
+                      id="upload-template"
+                    />
+                  </div>
+                  {formData.templateFiles && formData.templateFiles.length > 0 && (
+                    <div className="create-irl__uploaded-files" style={{ marginTop: '1rem' }}>
+                      <h4 className="create-irl__uploaded-title" style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Template Files:</h4>
+                      <ul className="create-irl__file-list" style={{ listStyle: 'none', padding: 0, marginTop: '8px' }}>
+                        {formData.templateFiles.map((f, i) => (
+                          <li key={i} className="create-irl__file-item" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                            <span className="create-irl__file-icon">📋</span>
+                            {f.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             </SectionCard>
 
