@@ -229,14 +229,14 @@ export async function copyAttribute(attributeId) {
 }
 
 export async function getCompaniesDropdown() {
-  const url = `${MASTERS_API_URL}/mmjc/masters/companiesDropdown`;
+  const url = `/onemmjc-api/api/masters/companies?pageNumber=0&pageSize=1000&searchQuery=&isUnpaginated=false`;
   const response = await fetchWithAuth(url, { method: 'GET' });
   if (!response.ok) throw new Error(`Error fetching companies: ${response.statusText}`);
   return response.json();
 }
 
 export async function getTeams() {
-  const url = `${MASTERS_API_URL}/mmjc/masters/teams?pageNumber=0&pageSize=1000&teamName=`;
+  const url = `/onemmjc-api/api/masters/teams?pageNumber=0&pageSize=1000&teamName=`;
   const response = await fetchWithAuth(url, { method: 'GET' });
   if (!response.ok) throw new Error(`Error fetching teams: ${response.statusText}`);
   return response.json();

@@ -78,8 +78,22 @@ function CreateIRL() {
           getFormTypeMasters().catch(() => ({ body: [] }))
         ])
         
-        setDropdownCompanies(compRes?.body || [])
-        setDropdownTeams(teamRes?.body?.content || teamRes?.body?.data || [])
+        // Extract data flexibly depending on whether it's wrapped in a 'body' envelope or is a direct paginated response
+        const extractData = (res) => {
+          if (!res) return [];
+          if (Array.isArray(res)) return res;
+          if (Array.isArray(res.content)) return res.content;
+          if (Array.isArray(res.data)) return res.data;
+          if (res.body) {
+            if (Array.isArray(res.body)) return res.body;
+            if (Array.isArray(res.body.content)) return res.body.content;
+            if (Array.isArray(res.body.data)) return res.body.data;
+          }
+          return [];
+        };
+
+        setDropdownCompanies(extractData(compRes))
+        setDropdownTeams(extractData(teamRes))
         setDropdownFormTypes(formRes?.body || [])
       } catch (err) {
         console.error('Failed to fetch dropdowns:', err)
@@ -371,6 +385,16 @@ function CreateIRL() {
                   value={formData.formTypeMasterId}
                   onChange={updateField('formTypeMasterId')}
                   id="select-form"
+                />
+                <FormField
+                  label="Select template"
+                  required
+                  type="select"
+                  placeholder="Select template"
+                  options={dynamicTemplateOptions}
+                  value={formData.templateMasterId}
+                  onChange={updateField('templateMasterId')}
+                  id="select-template"
                 />
 
               </div>

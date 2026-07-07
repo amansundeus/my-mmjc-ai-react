@@ -45,6 +45,8 @@ function AttributeManagement() {
       }
       return newIds;
     })
+    // Clear schema to prevent saving fields from a previous form into the new form
+    setSchema(null)
   }
 
   useEffect(() => {
@@ -196,42 +198,65 @@ function AttributeManagement() {
       
       const formTypeId = masterIds.formTypeId;
       
-      // Extract a valid sectionMasterId from an existing field to assign to newly pasted fields
-      // This prevents the 400 foreign key constraint error when copying from another Form Type
-      const existingField = schema.find(f => !f.isNew && f.sectionMasterId);
-      const targetSectionId = existingField ? existingField.sectionMasterId : null;
+      // Check if this is a completely new/empty form (no existing fields from backend)
+      const hasExistingFields = schema.some(f => !f.isNew);
+      
+      if (!hasExistingFields) {
+        // Sanitize all new fields so bulk API doesn't throw 400 for cross-form IDs
+        const sanitizedBulkSchema = schema.map(f => {
+          const safeField = { ...f, formTypeMasterId: formTypeId };
+          delete safeField.sectionMasterId;
+          delete safeField.templateMasterId;
+          delete safeField.sourceMasterId;
+          if (masterIds.templateId) safeField.templateMasterId = masterIds.templateId;
+          if (masterIds.sourceId) safeField.sourceMasterId = masterIds.sourceId;
+          return safeField;
+        });
+        await saveFormAttributesBulk(formTypeId, sanitizedBulkSchema);
+      } else {
+        // Hybrid individual saving to preserve existing sections
+        const existingField = schema.find(f => !f.isNew && f.sectionMasterId);
+        const targetSectionId = existingField ? existingField.sectionMasterId : null;
 
-      // Process fields individually to avoid bulk API side-effects
-      for (const field of schema) {
-        const payload = {
-          ...field,
-          name: field.name || field.label,
-          fieldNo: field.fieldNo || field.fieldId,
-          isMandatory: field.isMandatory !== undefined ? field.isMandatory : field.required,
-          fieldType: field.fieldType || field.type,
-          formTypeMasterId: formTypeId,
-          templateMasterId: masterIds.templateId || field.templateMasterId || null,
-          sourceMasterId: masterIds.sourceId || field.sourceMasterId || null,
-        };
-        
-        // Clean UI specific keys
-        delete payload.label;
-        delete payload.fieldId;
-        delete payload.required;
-        delete payload.type;
-        delete payload.isNew;
-        delete payload.attributeId;
-        delete payload.originalIndex;
+        for (const field of schema) {
+          const payload = {
+            ...field,
+            name: field.name || field.label,
+            fieldNo: field.fieldNo || field.fieldId,
+            isMandatory: field.isMandatory !== undefined ? field.isMandatory : field.required,
+            fieldType: field.fieldType || field.type,
+            formTypeMasterId: formTypeId,
+          };
+          
+          delete payload.label;
+          delete payload.fieldId;
+          delete payload.required;
+          delete payload.type;
+          delete payload.isNew;
+          delete payload.attributeId;
+          delete payload.originalIndex;
 
-        if (field.isNew) {
-          delete payload.id; // ensure no ID for creation
-          // Use the target form's valid section to prevent cross-form 400 error
-          payload.sectionMasterId = targetSectionId;
-          await createAttribute(payload);
-        } else {
-          const attributeId = field.id || field.attributeId;
-          if (attributeId) {
-            await updateFormAttribute(attributeId, payload);
+          if (field.isNew) {
+            delete payload.id;
+            // Sanitize new fields to prevent 400 errors from copied foreign keys
+            delete payload.sectionMasterId;
+            delete payload.templateMasterId;
+            delete payload.sourceMasterId;
+            
+            if (targetSectionId) payload.sectionMasterId = targetSectionId;
+            if (masterIds.templateId) payload.templateMasterId = masterIds.templateId;
+            if (masterIds.sourceId) payload.sourceMasterId = masterIds.sourceId;
+            
+            await createAttribute(payload);
+          } else if (field.isEdited) {
+            const attributeId = field.id || field.attributeId;
+            if (attributeId) {
+              // Existing fields MUST perfectly retain their original foreign keys to prevent 400 errors on PUT
+              payload.sectionMasterId = field.sectionMasterId; 
+              payload.templateMasterId = field.templateMasterId;
+              payload.sourceMasterId = field.sourceMasterId;
+              await updateFormAttribute(attributeId, payload);
+            }
           }
         }
       }
@@ -352,6 +377,7 @@ function AttributeManagement() {
     setEditingField(null)
   }
 
+
   const handleModalChange = (key, value) => {
     setEditingField(prev => ({ ...prev, [key]: value }))
   }
@@ -378,7 +404,7 @@ function AttributeManagement() {
       };
 
       // Just update local schema state. Backend save happens on "Save Schema" click
-      const savedField = { ...payload, isNew: editingField.isNew };
+      const savedField = { ...payload, isNew: editingField.isNew, isEdited: true };
 
       const updated = [...schema]
       updated[editingIndex] = savedField

@@ -47,9 +47,21 @@ function UploadTemplate() {
           getTeams().catch(() => ({ body: { content: [] } })),
           getFormTypeMasters().catch(() => ({ body: [] }))
         ]);
+        const extractData = (res) => {
+          if (!res) return [];
+          if (Array.isArray(res)) return res;
+          if (Array.isArray(res.content)) return res.content;
+          if (Array.isArray(res.data)) return res.data;
+          if (res.body) {
+            if (Array.isArray(res.body)) return res.body;
+            if (Array.isArray(res.body.content)) return res.body.content;
+            if (Array.isArray(res.body.data)) return res.body.data;
+          }
+          return [];
+        };
         
-        setDropdownCompanies(compRes?.body || []);
-        setDropdownTeams(teamRes?.body?.content || teamRes?.body?.data || []);
+        setDropdownCompanies(extractData(compRes));
+        setDropdownTeams(extractData(teamRes));
         setDropdownFormTypes(formRes?.body || []);
       } catch (err) {
         console.error('Failed to fetch dropdowns:', err);
